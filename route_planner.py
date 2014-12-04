@@ -19,11 +19,14 @@ g = nx.read_shp("data/tl_2013_06_prisecroads.shp")
 # is only about 400 nodes, thus limiting the amount of meaningful routes.
 sg = list(nx.connected_component_subgraphs(g.to_undirected()))[0]
 
-# Starting position => Monterey area
+# Starting => Monterey area
 pos0 = (36.6026, -121.9026)
 
-# Ending position => San Luis Obispo area
-pos1 = (35.235503, -120.685254)
+# Taking a break => Los Angeles area
+pos1 = (34.0569, -118.2427)
+
+# End => California/Mexico Boarder
+pos2 = (32.542181, -117.029543)
 
 def get_path(n0, n1):
     """If n0 and n1 are connected nodes in the graph, this function
@@ -59,15 +62,20 @@ nodes = np.array(sg.nodes())
 # Get the closest nodes in the graph looking at the Euclidean distance
 pos0_i = np.argmin(np.sum((nodes[:,::-1] - pos0)**2, axis=1))
 pos1_i = np.argmin(np.sum((nodes[:,::-1] - pos1)**2, axis=1))
+pos2_i = np.argmin(np.sum((nodes[:,::-1] - pos2)**2, axis=1))
 
 # Compute the shortest path. Dijkstra's algorithm.
-path = nx.shortest_path(sg, source=tuple(nodes[pos0_i]), target=tuple(nodes[pos1_i]), weight='distance')
+path1 = nx.shortest_path(sg, source=tuple(nodes[pos0_i]), target=tuple(nodes[pos1_i]), weight='distance')
+path2 = nx.shortest_path(sg, source=tuple(nodes[pos1_i]), target=tuple(nodes[pos2_i]), weight='distance')
 
 # Get a que sheet of the roads
-roads = pd.DataFrame([sg.edge[path[i]][path[i + 1]] for i in range(len(path) - 1)], columns=['FULLNAME', 'MTFCC', 'RTTYP', 'distance'])
+roads1 = pd.DataFrame([sg.edge[path1[i]][path1[i + 1]] for i in range(len(path1) - 1)], columns=['FULLNAME', 'MTFCC', 'RTTYP', 'distance'])
+roads2 = pd.DataFrame([sg.edge[path2[i]][path2[i + 1]] for i in range(len(path2) - 1)], columns=['FULLNAME', 'MTFCC', 'RTTYP', 'distance'])
+
+roads = roads1.append(roads2)
 
 # Call the map
-map = smopy.Map(pos0, pos1, z=9, margin=.1)
+map = smopy.Map(pos0, pos2, z=9, margin=.1)
 
 def get_full_path(path):
     """Return the positions along a path."""
@@ -84,16 +92,19 @@ def get_full_path(path):
     return np.vstack(p_list)
 
 # Get the path
-linepath = get_full_path(path)
-x, y = map.to_pixels(linepath[:,1], linepath[:,0])
+linepath1 = get_full_path(path1)
+linepath2 = get_full_path(path2)
+
+x, y = map.to_pixels(linepath1[:,1], linepath1[:,0])
+h, k = map.to_pixels(linepath2[:,1], linepath2[:,0])
+
 
 plt.figure(figsize=(5,8));
 map.show_mpl();
 # Plot the itinerary.
 plt.plot(x, y, '-k', lw=1.5);
+plt.plot(h, k, '-k', lw=1.5);
 # Mark our two positions.
 plt.plot(x[0], y[0], 'ob', ms=5);
-plt.plot(x[-1], y[-1], 'or', ms=5);
-
-
-
+plt.plot(h[0], k[0], 'og', ms=5);
+plt.plot(h[-1], k[-1], 'or', ms=5);
