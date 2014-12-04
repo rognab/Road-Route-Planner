@@ -10,7 +10,6 @@ Furthermore the roads pandas dataframe is a cue sheet of the routes specific roa
 roads['distance'].sum()
 ```
 
-This routing tool implements Dijkstra's algorithm to find the shortest path between the given starting and
-ending points. 
+This routing tool implements Dijkstra's algorithm to find the shortest path between the given starting and ending points. 
 
-More info and visuals can be found here at http://www.davidbangor.com/blog
+More info and visuals can be found here at http://www.davidbangor.com/blog relating this routing tool to a bicycle tour I completed in the summer of 2007.
