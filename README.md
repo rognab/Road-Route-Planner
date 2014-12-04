@@ -6,7 +6,10 @@ To run this tool simply download the data (a Shapefile dataset) and the route_pl
 In route_planner.py, input your starting and ending positons as a latitutde/lognitude coordinates and
 run the file to get a map of your route.  
 
-Furthermore the roads pandas dataframe is a cue sheet of the routes specific roads and the total distance of the route is given by the length of the path variable. 
+Furthermore the roads pandas dataframe is a cue sheet of the routes specific roads and the total distance of the route is given by 
+```python
+roads['distance'].sum()
+```
 
 This routing tool implements Dijkstra's algorithm to find the shortest path between the given starting and
 ending points. 
